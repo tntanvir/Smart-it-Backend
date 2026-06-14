@@ -1,0 +1,544 @@
+import json
+import os
+
+collection = {
+  "info": {
+    "name": "Smart IT Support - Complete API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8001", "type": "string" },
+    { "key": "customer_token", "value": "", "type": "string" },
+    { "key": "tech_token", "value": "", "type": "string" },
+    { "key": "ticket_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth APIs",
+      "item": [
+        {
+          "name": "1. Register Customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Customer Flow\",\n  \"email\": \"customerflow@example.com\",\n  \"password\": \"yourpassword\",\n  \"role\": \"customer\",\n  \"phone\": \"1234567890\",\n  \"location\": \"NY\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register", ""]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customerflow@example.com\",\n  \"otp_code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/verify-otp/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "verify-otp", ""]
+            }
+          }
+        },
+        {
+          "name": "Token Refresh",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"your_refresh_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/token/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "token", "refresh", ""]
+            }
+          }
+        },
+        {
+          "name": "2. Login Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access) {",
+                  "    pm.collectionVariables.set('customer_token', jsonData.access);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customerflow@example.com\",\n  \"password\": \"yourpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login", ""]
+            }
+          }
+        },
+        {
+          "name": "4. Register Technician",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tech Flow\",\n  \"email\": \"techflow@example.com\",\n  \"password\": \"yourpassword\",\n  \"role\": \"technician\",\n  \"phone\": \"0987654321\",\n  \"location\": \"SF\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register", ""]
+            }
+          }
+        },
+        {
+          "name": "5. Login Technician",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access) {",
+                  "    pm.collectionVariables.set('tech_token', jsonData.access);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"techflow@example.com\",\n  \"password\": \"yourpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login", ""]
+            }
+          }
+        },
+        {
+          "name": "Customer Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Customer Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customer_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Customer Name\",\n  \"phone\": \"0987654321\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile", ""]
+            }
+          }
+        },
+        {
+          "name": "Technician Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tech_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Technician Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tech_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Tech Name\",\n  \"technician_profile\": {\n    \"skills\": \"Networking, Security\",\n    \"experience_years\": 5\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets APIs",
+      "item": [
+        {
+          "name": "3. Create Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.collectionVariables.set('ticket_id', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customer_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Laptop not turning on\",\n  \"description\": \"My laptop screen is completely black.\",\n  \"category\": \"hardware\",\n  \"priority\": \"high\",\n  \"budget\": \"50.00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tickets/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", ""]
+            }
+          }
+        },
+        {
+          "name": "Customer Tickets Dashboard (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", ""],
+              "query": [
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer Payment Requests (Pending Confirmation - Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/payment-requests/?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", "payment-requests", ""],
+              "query": [
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Specific Ticket",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/{{ticket_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", "{{ticket_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Ticket",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customer_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Laptop Issue\",\n  \"description\": \"Still completely black.\",\n  \"category\": \"hardware\",\n  \"priority\": \"high\",\n  \"budget\": \"60.00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tickets/{{ticket_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", "{{ticket_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Delete Ticket",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/{{ticket_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", "{{ticket_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "10. Leave Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customer_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Amazing work!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tickets/{{ticket_id}}/review/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tickets", "{{ticket_id}}", "review", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Technician APIs",
+      "item": [
+        {
+          "name": "6. View Available Tickets (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tech_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/technician/tickets/available/?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "technician", "tickets", "available", ""],
+              "query": [
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "7. Accept Ticket",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tech_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/technician/ticket/{{ticket_id}}/accept/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "technician", "ticket", "{{ticket_id}}", "accept", ""]
+            }
+          }
+        },
+        {
+          "name": "Technician Tickets Dashboard (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tech_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/technician/ticket/accpet/deshboard/?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "technician", "ticket", "accpet", "deshboard", ""],
+              "query": [
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. Complete Ticket (Request Payment)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tech_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/technician/ticket/{{ticket_id}}/complete/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "technician", "ticket", "{{ticket_id}}", "complete", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment APIs",
+      "item": [
+        {
+          "name": "9. Create Checkout Session",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/payment/checkout/{{ticket_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payment", "checkout", "{{ticket_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Stripe Webhook (Local Simulation)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/payment/webhook/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payment", "webhook", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Message APIs",
+      "item": [
+        {
+          "name": "Get Chat History (Customer) (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/message/ticket/{{ticket_id}}/?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "message", "ticket", "{{ticket_id}}", ""],
+              "query": [
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Chat History (Technician) (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tech_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/message/ticket/{{ticket_id}}/?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "message", "ticket", "{{ticket_id}}", ""],
+              "query": [
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Live Chat WebSocket (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "ws://127.0.0.1:8001/ws/chat/{{ticket_id}}/?token={{customer_token}}",
+              "protocol": "ws",
+              "host": ["127", "0", "0", "1"],
+              "port": "8001",
+              "path": ["ws", "chat", "{{ticket_id}}", ""],
+              "query": [
+                { "key": "token", "value": "{{customer_token}}" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Live Chat WebSocket (Technician)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "ws://127.0.0.1:8001/ws/chat/{{ticket_id}}/?token={{tech_token}}",
+              "protocol": "ws",
+              "host": ["127", "0", "0", "1"],
+              "port": "8001",
+              "path": ["ws", "chat", "{{ticket_id}}", ""],
+              "query": [
+                { "key": "token", "value": "{{tech_token}}" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analyze Dashboard APIs",
+      "item": [
+        {
+          "name": "Customer Analyze Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/analyze/customer/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analyze", "customer", ""]
+            }
+          }
+        },
+        {
+          "name": "Technician Analyze Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tech_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/analyze/technician/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analyze", "technician", ""]
+            }
+          }
+        },
+        {
+          "name": "Admin System Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/analyze/admin/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analyze", "admin", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
+out_path = r'e:\tanvir\2026 project\Smart IT Support\backend\SmartITSupport_Complete_Collection.postman_collection.json'
+with open(out_path, 'w', encoding='utf-8') as f:
+    json.dump(collection, f, indent=2)
+
+print('Done writing complete postman collection.')

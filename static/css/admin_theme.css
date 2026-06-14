@@ -1,0 +1,37 @@
+/* Force dark mode background to pure black */
+html.dark body {
+    background-color: #000000 !important;
+}
+
+/* Force main content wrapper background to pure black */
+html.dark main {
+    background-color: #000000 !important;
+}
+
+html.dark #unfold-main {
+    background-color: #000000 !important;
+}
+
+html.dark .bg-base-900,
+html.dark .bg-base-950 {
+    background-color: #000000 !important;
+}
+
+/* Force sidebar and cards to be neutral gray */
+html.dark .bg-base-800,
+html.dark aside,
+html.dark .overflow-hidden.rounded-md.border {
+    background-color: #262626 !important; /* Neutral gray */
+    border-color: #404040 !important;
+}
+
+/* Override borders */
+html.dark .border-base-800 {
+    border-color: #404040 !important;
+}
+
+/* Header */
+html.dark header {
+    background-color: #171717 !important;
+    border-color: #404040 !important;
+}

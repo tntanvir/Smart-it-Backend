@@ -1,0 +1,350 @@
+{
+  "info": {
+    "name": "Smart IT Support - Full Perfect Workflow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8001",
+      "type": "string"
+    },
+    {
+      "key": "customer_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tech_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticket_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Customer Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Customer A\",\n  \"email\": \"customerA@example.com\",\n  \"password\": \"yourpassword\",\n  \"role\": \"customer\",\n  \"phone\": \"1234567890\",\n  \"location\": \"NY\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/register/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "0. Technician Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Tech B\",\n  \"email\": \"techB@example.com\",\n  \"password\": \"yourpassword\",\n  \"role\": \"technician\",\n  \"phone\": \"0987654321\",\n  \"location\": \"SF\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/register/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "1. Customer Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.access) {",
+              "    pm.collectionVariables.set('customer_token', jsonData.access);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"yourpassword\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Technician Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.access) {",
+              "    pm.collectionVariables.set('tech_token', jsonData.access);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"tech@example.com\",\n  \"password\": \"yourpassword\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Customer: Create Ticket",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.id) {",
+              "    pm.collectionVariables.set('ticket_id', jsonData.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Laptop not turning on\",\n  \"description\": \"My laptop screen is completely black.\",\n  \"category\": \"hardware\",\n  \"priority\": \"high\",\n  \"budget\": \"50.00\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/tickets/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "tickets",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Tech: View Available Tickets",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tech_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/technician/tickets/available/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "technician",
+            "tickets",
+            "available",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Tech: Accept Ticket",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tech_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/technician/ticket/{{ticket_id}}/accept/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "technician",
+            "ticket",
+            "{{ticket_id}}",
+            "accept",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Tech: Mark Complete (Request Payment)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tech_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/technician/ticket/{{ticket_id}}/complete/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "technician",
+            "ticket",
+            "{{ticket_id}}",
+            "complete",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Customer: Create Checkout Session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{customer_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/payment/checkout/{{ticket_id}}/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "payment",
+            "checkout",
+            "{{ticket_id}}",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. Customer: Leave Review (After Payment Webhook)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Amazing work!\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/tickets/{{ticket_id}}/review/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "tickets",
+            "{{ticket_id}}",
+            "review",
+            ""
+          ]
+        }
+      }
+    }
+  ]
+}
