@@ -3,8 +3,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
-from .models import Ticket
-from .serializers import TicketSerializer
+from .models import Ticket, Category
+from .serializers import TicketSerializer, CategorySerializer
+
+class CategoryListView(APIView):
+    permission_classes = [] # Publicly accessible
+    
+    def get(self, request):
+        categories = Category.objects.all().prefetch_related('subcategories')
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TicketListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -101,8 +109,61 @@ class TicketDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 from .models import Review
-from .serializers import ReviewSerializer
+from .serializers import ReviewSerializer, TopReviewSerializer
 from django.db.models import Avg
+
+class TopReviewsView(APIView):
+    permission_classes = [] # Allow unauthenticated access for homepage
+
+    def get(self, request):
+        reviews = Review.objects.select_related(
+            'ticket', 'ticket__user', 'ticket__assigned_technician'
+        ).order_by('-rating', '-created_at')[:15]
+        
+        serializer = TopReviewSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+from django.core.mail import EmailMessage
+from django.conf import settings
+
+class SupportMessageView(APIView):
+    permission_classes = [] # Allow unauthenticated access
+
+    def post(self, request):
+        subject = request.data.get('subject')
+        body = request.data.get('body')
+        
+        if request.user.is_authenticated:
+            email = request.user.email
+        else:
+            email = request.data.get('email')
+            
+        if not subject or not body or not email:
+            return Response({'error': 'Subject, body, and email are required.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            # 1. Send to Admin
+            admin_msg = EmailMessage(
+                subject=f"New Support Request: {subject}",
+                body=f"You have received a new support request.\n\nFrom: {email}\n\nMessage:\n{body}",
+                from_email=settings.EMAIL_HOST_USER,
+                to=[settings.EMAIL_HOST_USER],
+                reply_to=[email],
+            )
+            admin_msg.send(fail_silently=False)
+            
+            # 2. Send Auto-reply to User
+            user_msg = EmailMessage(
+                subject=f"Re: Support Request: {subject}",
+                body=f"Hi there,\n\nWe have received your support request regarding '{subject}'. Our team will review it and get back to you shortly.\n\nYour message:\n{body}\n\nThanks,\nTechBridge Support Team",
+                from_email=settings.EMAIL_HOST_USER,
+                to=[email],
+            )
+            user_msg.send(fail_silently=False)
+            
+            return Response({'message': 'Support message sent successfully.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class TicketReviewView(APIView):
     permission_classes = [IsAuthenticated]

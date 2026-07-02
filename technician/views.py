@@ -18,14 +18,20 @@ class AvailableTicketsView(APIView):
         
         # Apply filters
         category = request.query_params.get('category')
+        sub_category = request.query_params.get('sub_category')
         priority = request.query_params.get('priority')
+        address = request.query_params.get('address')
         min_budget = request.query_params.get('min_budget')
         max_budget = request.query_params.get('max_budget')
 
         if category and category.lower() != 'all':
-            queryset = queryset.filter(category=category.lower())
+            queryset = queryset.filter(category_id=category)
+        if sub_category and sub_category.lower() != 'all':
+            queryset = queryset.filter(sub_category_id=sub_category)
         if priority and priority.lower() != 'all':
             queryset = queryset.filter(priority=priority.lower())
+        if address:
+            queryset = queryset.filter(address__icontains=address)
         if min_budget:
             try:
                 queryset = queryset.filter(budget__gte=float(min_budget))
@@ -48,12 +54,74 @@ class AvailableTicketsView(APIView):
         serializer = TicketSerializer(tickets, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class PublicJobsView(APIView):
+    permission_classes = [] # Allow unauthenticated access
+
+    def get(self, request):
+        queryset = Ticket.objects.filter(status='open').select_related('user', 'assigned_technician')
+        
+        # Apply filters
+        category = request.query_params.get('category')
+        sub_category = request.query_params.get('sub_category')
+        priority = request.query_params.get('priority')
+        address = request.query_params.get('address')
+        min_budget = request.query_params.get('min_budget')
+        max_budget = request.query_params.get('max_budget')
+
+        if category and category.lower() != 'all':
+            queryset = queryset.filter(category_id=category)
+        if sub_category and sub_category.lower() != 'all':
+            queryset = queryset.filter(sub_category_id=sub_category)
+        if priority and priority.lower() != 'all':
+            queryset = queryset.filter(priority=priority.lower())
+        if address:
+            queryset = queryset.filter(address__icontains=address)
+        if min_budget:
+            try:
+                queryset = queryset.filter(budget__gte=float(min_budget))
+            except ValueError:
+                pass
+        if max_budget:
+            try:
+                queryset = queryset.filter(budget__lte=float(max_budget))
+            except ValueError:
+                pass
+
+        tickets = queryset.order_by('-created_at')
+        
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(tickets, request)
+        if page is not None:
+            serializer = TicketSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        serializer = TicketSerializer(tickets, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PublicJobDetailView(APIView):
+    permission_classes = [] # Allow unauthenticated access
+
+    def get(self, request, pk):
+        try:
+            ticket = Ticket.objects.get(pk=pk, status='open')
+            serializer = TicketSerializer(ticket)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Ticket.DoesNotExist:
+            return Response({"error": "Job not found or no longer available."}, status=status.HTTP_404_NOT_FOUND)
+
 class AcceptTicketView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
         if request.user.role != 'technician':
             return Response({"error": "Only technicians can accept tickets."}, status=status.HTTP_403_FORBIDDEN)
+            
+        # Check if technician is approved by admin
+        try:
+            if not request.user.technician_profile.availability_status:
+                return Response({"error": "Your account is pending admin approval. You cannot accept jobs yet."}, status=status.HTTP_403_FORBIDDEN)
+        except Exception:
+            return Response({"error": "Technician profile not found."}, status=status.HTTP_404_NOT_FOUND)
         
         try:
             ticket = Ticket.objects.get(pk=pk, status='open')

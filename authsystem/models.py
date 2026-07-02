@@ -33,6 +33,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='customer')
     phone = models.CharField(max_length=20, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
+    nid_number = models.CharField(max_length=50, blank=True, null=True)
     
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -50,7 +51,7 @@ class TechnicianProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='technician_profile')
     skills = models.CharField(max_length=255, help_text="Comma separated skills, e.g. Networking, Hardware, Software")
     experience_years = models.PositiveIntegerField(default=0)
-    availability_status = models.BooleanField(default=True)
+    availability_status = models.BooleanField(default=False)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
 
     def __str__(self):

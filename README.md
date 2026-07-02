@@ -1,4 +1,4 @@
-# Smart IT Support Platform
+# TechBridge Support Platform
 
 A modern, robust, and scalable Django backend platform connecting customers with IT technicians for support and repairs. It features real-time live chat via WebSockets, comprehensive ticketing lifecycle management, OTP-based secure authentication, and Stripe checkout for payments.
 
@@ -54,8 +54,8 @@ A modern, robust, and scalable Django backend platform connecting customers with
 
 ### 1. Clone the repository
 ```bash
-git clone https://your-repository-link.git
-cd "Smart IT Support/backend"
+git clone https://github.com/tntanvir/Smart-it-Backend.git
+cd Smart-it-Backend
 ```
 
 ### 2. Create and Activate Virtual Environment
@@ -111,12 +111,12 @@ daphne -b 127.0.0.1 -p 8001 SmartITSupport.asgi:application
 ## 📡 API Postman Documentation
 
 This repository includes a completely comprehensive Postman Collection:
-**`SmartITSupport_Complete_Collection.postman_collection.json`**
+**`TechBridgeSupport_Complete_Collection.postman_collection.json`**
 
 To test the APIs:
 1. Open Postman.
 2. Go to `File` -> `Import`.
-3. Select `SmartITSupport_Complete_Collection.postman_collection.json`.
+3. Select `TechBridgeSupport_Complete_Collection.postman_collection.json`.
 4. Run the endpoints sequentially to test the full Ticket Workflow (Registration -> Ticket Creation -> Accept -> Chat -> Complete -> Pay -> Review).
 
 ---

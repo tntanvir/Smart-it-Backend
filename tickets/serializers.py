@@ -1,6 +1,17 @@
 from rest_framework import serializers
-from .models import Ticket, Review
+from .models import Ticket, Review, Category, SubCategory
 from authsystem.serializers import UserSerializer
+
+class SubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ['id', 'name']
+
+class CategorySerializer(serializers.ModelSerializer):
+    subcategories = SubCategorySerializer(many=True, read_only=True)
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'description', 'subcategories']
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,34 +19,43 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'ticket', 'rating', 'comment', 'created_at']
         read_only_fields = ['id', 'ticket', 'created_at']
 
+class TopReviewSerializer(serializers.ModelSerializer):
+    customer_info = UserSerializer(source='ticket.user', read_only=True)
+    technician_info = UserSerializer(source='ticket.assigned_technician', read_only=True)
+    ticket_title = serializers.CharField(source='ticket.title', read_only=True)
+    category_name = serializers.CharField(source='ticket.category.name', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = ['id', 'rating', 'comment', 'created_at', 'customer_info', 'technician_info', 'ticket_title', 'category_name']
+
 class TicketSerializer(serializers.ModelSerializer):
-    # Read-only fields to get detailed user info when reading
     customer_info = UserSerializer(source='user', read_only=True)
     technician_info = UserSerializer(source='assigned_technician', read_only=True)
     review = serializers.SerializerMethodField()
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    sub_category_name = serializers.CharField(source='sub_category.name', read_only=True)
 
     class Meta:
         model = Ticket
         fields = [
-            'id', 'user', 'title', 'description', 'category', 'priority',
-            'status', 'budget', 'assigned_technician', 'created_at', 'updated_at',
+            'id', 'user', 'title', 'description', 'category', 'sub_category',
+            'category_name', 'sub_category_name', 'priority',
+            'address', 'status', 'budget', 'assigned_technician', 'created_at', 'updated_at',
             'customer_info', 'technician_info', 'review'
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at', 'status', 'assigned_technician']
 
     def get_review(self, obj):
         try:
-            if obj.review:
+            if hasattr(obj, 'review') and obj.review:
                 return ReviewSerializer(obj.review).data
         except Exception:
             return None
         return None
 
     def create(self, validated_data):
-        # Automatically set the logged-in user as the creator
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
             validated_data['user'] = request.user
         return super().create(validated_data)
-
-

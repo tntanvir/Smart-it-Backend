@@ -1,15 +1,28 @@
 from django.db import models
 from django.conf import settings
 
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = "Categories"
+
+    def __str__(self):
+        return self.name
+
+class SubCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ('category', 'name')
+        verbose_name_plural = "Sub Categories"
+
+    def __str__(self):
+        return f"{self.category.name} - {self.name}"
+
 class Ticket(models.Model):
-    CATEGORY_CHOICES = (
-        ('hardware', 'Hardware'),
-        ('software', 'Software'),
-        ('networking', 'Networking'),
-        ('cloud', 'Cloud'),
-        ('general', 'General'),
-    )
-    
     PRIORITY_CHOICES = (
         ('low', 'Low'),
         ('medium', 'Medium'),
@@ -28,8 +41,10 @@ class Ticket(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='customer_tickets')
     title = models.CharField(max_length=255)
     description = models.TextField()
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='general')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    sub_category = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='low')
+    address = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='open')
     budget = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     assigned_technician = models.ForeignKey(

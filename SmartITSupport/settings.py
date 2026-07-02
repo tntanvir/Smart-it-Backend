@@ -163,8 +163,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom Unfold Admin Theme (Black/Gray Palette)
 UNFOLD = {
-    "SITE_TITLE": "Smart IT Support Admin",
-    "SITE_HEADER": "Smart IT Support",
+    "SITE_TITLE": "TechBridge Support Admin",
+    "SITE_HEADER": "TechBridge Support",
     "STYLES": [
         lambda request: STATIC_URL + "css/admin_theme.css",
     ],
@@ -230,16 +230,16 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=100),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=700),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 UNFOLD = {
-    "SITE_TITLE": "Smart IT Support Admin",
-    "SITE_HEADER": "Smart IT Support",
+    "SITE_TITLE": "TechBridge Support Admin",
+    "SITE_HEADER": "TechBridge Support",
     "SITE_URL": "/",
     "SITE_ICON": {
         "light": lambda request: "https://raw.githubusercontent.com/tailwindlabs/heroicons/master/optimized/24/outline/cpu-chip.svg",
@@ -288,6 +288,16 @@ UNFOLD = {
                 "title": _("Operations"),
                 "separator": True,
                 "items": [
+                    {
+                        "title": _("Categories"),
+                        "icon": "category",
+                        "link": reverse_lazy("admin:tickets_category_changelist"),
+                    },
+                    {
+                        "title": _("Sub Categories"),
+                        "icon": "label",
+                        "link": reverse_lazy("admin:tickets_subcategory_changelist"),
+                    },
                     {
                         "title": _("Tickets"),
                         "icon": "confirmation_number",

@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'role', 'phone', 'location', 'created_at', 'is_active', 'technician_profile']
+        fields = ['id', 'name', 'email', 'role', 'phone', 'location', 'nid_number', 'created_at', 'is_active', 'technician_profile']
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     skills = serializers.CharField(source='technician_profile.skills', required=False, allow_blank=True)
@@ -20,7 +20,8 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['name', 'phone', 'location', 'skills', 'experience_years']
+        fields = ['name', 'phone', 'location', 'nid_number', 'skills', 'experience_years']
+        read_only_fields = ['nid_number']
 
     def update(self, instance, validated_data):
         technician_data = validated_data.pop('technician_profile', {})
@@ -49,7 +50,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['name', 'email', 'password', 'role', 'phone', 'location']
+        fields = ['name', 'email', 'password', 'role', 'phone', 'location', 'nid_number']
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -58,7 +59,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             role=validated_data.get('role', 'customer'),
             phone=validated_data.get('phone', ''),
-            location=validated_data.get('location', '')
+            location=validated_data.get('location', ''),
+            nid_number=validated_data.get('nid_number', '')
         )
         return user
 

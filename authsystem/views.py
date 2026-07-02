@@ -24,7 +24,7 @@ class RegisterView(APIView):
             otp.generate_otp()
 
             # Send Email
-            subject = 'Verify your account - Smart IT Support'
+            subject = 'Verify your account - TechBridge Support'
             text_content = f'Hello {user.name},\nYour OTP code is {otp.otp_code}. It is valid for 10 minutes.'
             html_content = render_to_string('authsystem/otp_email.html', {'name': user.name, 'otp_code': otp.otp_code})
             
@@ -68,6 +68,22 @@ class VerifyOTPView(APIView):
 
                 user.is_active = True
                 user.save()
+
+                # Notify admin if user is a technician
+                if user.role == 'technician':
+                    from django.conf import settings
+                    try:
+                        subject = f'Action Required: New Technician Registration ({user.name})'
+                        text_content = f'A new technician ({user.name}, Email: {user.email}) has just completed registration and OTP verification.\n\nPlease log in to the Django admin dashboard, check their TechnicianProfile, and approve them by checking the "availability_status" box so they can start accepting jobs.'
+                        admin_msg = EmailMultiAlternatives(
+                            subject,
+                            text_content,
+                            settings.EMAIL_HOST_USER,
+                            [settings.EMAIL_HOST_USER]
+                        )
+                        admin_msg.send(fail_silently=False)
+                    except Exception as e:
+                        print("Failed to send admin notification email:", str(e))
 
                 refresh = RefreshToken.for_user(user)
 
