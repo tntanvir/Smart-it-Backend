@@ -28,14 +28,19 @@ class RegisterView(APIView):
             text_content = f'Hello {user.name},\nYour OTP code is {otp.otp_code}. It is valid for 10 minutes.'
             html_content = render_to_string('authsystem/otp_email.html', {'name': user.name, 'otp_code': otp.otp_code})
             
+            from django.conf import settings
             msg = EmailMultiAlternatives(
                 subject,
                 text_content,
-                'noreply@smartitsupport.com',
+                settings.EMAIL_HOST_USER,
                 [user.email]
             )
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=False)
+            try:
+                msg.send(fail_silently=False)
+            except Exception as e:
+                print(f"Failed to send OTP email: {e}")
+                print(f"DEVELOPMENT MODE - OTP for {user.email} is: {otp.otp_code}")
 
             return Response({
                 "message": "User registered successfully. Please check your email for the OTP.",
